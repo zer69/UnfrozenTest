@@ -14,7 +14,6 @@ public enum MissionStatus
 
 public class Mission : MonoBehaviour
 {
-    [SerializeField] private string missionNumber;
     [SerializeField] private string_GameEvent missionPicked;
     [SerializeField] private MissionStatus missionStatus;
     private MissionStatus oldStatus;
@@ -28,13 +27,19 @@ public class Mission : MonoBehaviour
 
     private void Start()
     {
-        transform.Find("MissionNumber").GetComponent<TMP_Text>().text = missionNumber;
+        
+    }
+
+    public void SetMissionNumber()
+    {
+        transform.Find("MissionNumber").GetComponent<TMP_Text>().text = gameObject.name;
     }
 
     public void ClickAMission()
     {
-        missionPicked.Raise(missionNumber);
+        missionPicked.Raise(gameObject.name);
         missionStatus = MissionStatus.Active;
+        Debug.Log(GetComponent<RectTransform>().localPosition);
     }
 
     private void OnMissionStatusChange()

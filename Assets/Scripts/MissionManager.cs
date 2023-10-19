@@ -6,22 +6,33 @@ using TMPro;
 
 public class MissionManager : MonoBehaviour
 {
-    [SerializeField] private List<MissionInfo> missionInfoList = new List<MissionInfo>();
+    [Header("Mission initialization stuff")]
+    [SerializeField] private Transform missionRect;
+    [SerializeField] public MissionList missionList;
+    [SerializeField] private GameObject missionPrefab;
+
+    [Header("Mission choice stuff")]
     [SerializeField] private Transform missionBriefingCanvas;
+    
 
     private void Start()
     {
-        for (int i = 1; i <=11; i++)
+        foreach(MissionInfo missionInfo in missionList.missionInfoList)
         {
-            
-            missionInfoList.Add(Resources.Load<MissionInfo>("MissionInfo/Mission" + i.ToString()));
+            GameObject newMission = Instantiate(missionPrefab, missionRect);
+            Debug.Log(newMission.GetComponent<RectTransform>().anchoredPosition);
+            newMission.GetComponent<RectTransform>().anchoredPosition = missionInfo.missionPosition;
+            Debug.Log(newMission.GetComponent<RectTransform>().anchoredPosition);
+            Debug.LogWarning(missionInfo.missionNumber);
+            newMission.name = missionInfo.missionNumber;
+            newMission.GetComponent<Mission>().SetMissionNumber();
         }
     }
 
     public void UpdateMissionBriefing(string missionNumber)
     {
-        MissionInfo buffer = missionInfoList[0];
-        foreach (MissionInfo info in missionInfoList)
+        MissionInfo buffer = missionList.missionInfoList[0];
+        foreach (MissionInfo info in missionList.missionInfoList)
         {
             if (info.missionNumber == missionNumber)
             {
