@@ -166,9 +166,13 @@ public class MissionManager : MonoBehaviour
 
     public void SetPickedHero(int heroName)
     {
-        heroIsPicked = true;
-        pickedHeroName = (HeroName)heroName;
-        startMissionButton.interactable = heroIsPicked;
+        if (missionBriefingCanvas.gameObject.activeSelf)
+        {
+            heroIsPicked = true;
+            pickedHeroName = (HeroName)heroName;
+            startMissionButton.interactable = heroIsPicked;
+        }
+        
     }
 
     public void StartMission()
