@@ -2,20 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public enum MissionStatus
 {
-    None,
-    Unlocked,
     Locked,
+    Unlocked,
     Active,
+    LockedTemp,
     Completed
 }
 
 public class Mission : MonoBehaviour
 {
     [SerializeField] private string_GameEvent missionPicked;
-    [SerializeField] private MissionStatus missionStatus;
+    [SerializeField] private MissionStatus missionStatus = MissionStatus.Locked;
     private MissionStatus oldStatus;
 
     private void Update()
@@ -32,27 +33,55 @@ public class Mission : MonoBehaviour
 
     public void SetMissionNumber()
     {
-        transform.Find("MissionNumber").GetComponent<TMP_Text>().text = gameObject.name;
+        transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().text = gameObject.name;
+        missionStatus = MissionStatus.Locked;
+        if (transform.parent.tag == "DualMission")
+            transform.parent.GetComponent<Image>().enabled = false;
+        OnMissionStatusChange();
+    }
+
+    public void SetMissionStatus(MissionStatus ms)
+    {
+        missionStatus = ms;
+        
     }
 
     public void ClickAMission()
     {
+        
         missionPicked.Raise(gameObject.name);
         missionStatus = MissionStatus.Active;
-        Debug.Log(GetComponent<RectTransform>().localPosition);
     }
 
     private void OnMissionStatusChange()
     {
         switch (missionStatus)
         {
-            case MissionStatus.Unlocked:
-                break;
             case MissionStatus.Locked:
+                if (transform.parent.tag == "DualMission")
+                {
+                    transform.parent.GetComponent<Image>().enabled = false;
+                }
+                transform.GetChild(0).gameObject.SetActive(false);
+                break;
+            case MissionStatus.Unlocked:
+                if (transform.parent.tag == "DualMission")
+                {
+                    transform.parent.GetComponent<Image>().enabled = true;
+                }
+                transform.GetChild(0).gameObject.SetActive(true);
+
+
                 break;
             case MissionStatus.Active:
                 break;
+            case MissionStatus.LockedTemp:
+                GetComponent<Button>().interactable = false;
+                break;
             case MissionStatus.Completed:
+                GetComponent<Button>().interactable = true;
+                transform.GetChild(0).GetComponent<Image>().color = new Color(0.2f, 0.9f, 0.1f, 1f);
+                GetComponent<Button>().enabled = false;
                 break;
         }
     }
