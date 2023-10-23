@@ -7,4 +7,6 @@ public class MissionList : ScriptableObject
 {
     public List<MissionInfo> missionInfoList;
     public List<DualMissionInfo> dualMissionInfoList;
+
+
 }

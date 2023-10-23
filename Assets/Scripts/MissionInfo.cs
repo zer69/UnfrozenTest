@@ -15,6 +15,7 @@ public class MissionInfo
     public string missionNumber;
     public Vector3 missionPosition;
     public List<string> previousMissionList;
+    public int minimumValueToProceed;
     public List<string> missionsToUnlock;
 
     [Header("Mission Briefing")]
@@ -35,3 +36,4 @@ public class MissionInfo
 
     }
 }
+

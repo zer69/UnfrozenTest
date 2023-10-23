@@ -26,10 +26,12 @@ public class MissionManager : MonoBehaviour
     [Header("Mission completion stuff")]
     [SerializeField] private heroPoint_GameEvent heroPointGain;
     [SerializeField] private int_GameEvent unlockHero;
+    private bool[] unlockedCharacters = new bool[(int)HeroName.HeroCount];
 
 
     private void Start()
     {
+        
         //Create missions in world
         foreach(MissionInfo missionInfo in missionList.missionInfoList)
         {
@@ -57,6 +59,39 @@ public class MissionManager : MonoBehaviour
         }
 
         startMissionButton = missionBriefingCanvas.GetChild(0).GetChild(3).GetComponent<Button>();
+        ShowNextMissions("1");
+        for (int i = 0; i < (int)HeroName.HeroCount; i++)
+            unlockedCharacters[i] = false;
+        unlockedCharacters[0] = true;
+    }
+
+    private void ShowNextMissions(string missionNumber)
+    {
+        MissionInfo buffer = FindMissionInfo(missionNumber);
+
+        if (buffer.missionsToUnlock.Count > 0)
+        {
+            foreach (string mn in buffer.missionsToUnlock)
+            {
+
+                if (missionRect.Find(mn).GetComponent<Mission>() == null)
+                {
+                    if (missionRect.Find(mn).GetChild(0).GetComponent<Mission>().GetMissionStatus() == MissionStatus.Locked)
+                    {
+                        missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
+                        missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
+                    }
+                    
+
+                }
+                else
+                    if (missionRect.Find(mn).GetComponent<Mission>().GetMissionStatus() == MissionStatus.Locked)
+                        missionRect.Find(mn).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
+
+            }
+
+        }
+
     }
 
 
@@ -83,9 +118,21 @@ public class MissionManager : MonoBehaviour
 
         missionInfoCanvas.gameObject.SetActive(true);
         missionInfoCanvas.GetChild(0).GetChild(0).GetChild(0).GetComponent<TMP_Text>().text = buffer.missionName;
-        missionInfoCanvas.GetChild(0).GetChild(0).GetChild(1).GetComponent<TMP_Text>().text = buffer.allyText;
+
+        if (currentMissionNumber == "9")
+        {
+            string newAllyText = buffer.allyText + (unlockedCharacters[(int)HeroName.Crow] ? "вороны" : "совы");
+            string newEnemyText = buffer.enemyText + (unlockedCharacters[(int)HeroName.Crow] ? "совы" : "вороны");
+
+            missionInfoCanvas.GetChild(0).GetChild(0).GetChild(1).GetComponent<TMP_Text>().text = newAllyText;
+            missionInfoCanvas.GetChild(0).GetChild(0).GetChild(3).GetComponent<TMP_Text>().text = newEnemyText;
+        }
+        else
+        {
+            missionInfoCanvas.GetChild(0).GetChild(0).GetChild(1).GetComponent<TMP_Text>().text = buffer.allyText;
+            missionInfoCanvas.GetChild(0).GetChild(0).GetChild(3).GetComponent<TMP_Text>().text = buffer.enemyText;
+        }
         //missionInfoCanvas.GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = set sprite here
-        missionInfoCanvas.GetChild(0).GetChild(0).GetChild(3).GetComponent<TMP_Text>().text = buffer.enemyText;
 
         missionInfoCanvas.GetChild(0).GetChild(1).GetChild(0).GetComponent<TMP_Text>().text = buffer.missionText;
     }
@@ -140,29 +187,38 @@ public class MissionManager : MonoBehaviour
         }
 
         if (buffer.heroUnlockList.Count > 0)
+        {
             foreach (HeroName hn in buffer.heroUnlockList)
+            {
                 unlockHero.Raise((int)hn);
-
+                unlockedCharacters[(int)hn] = true;
+            }
+        }
+            
         if (buffer.missionsToUnlock.Count > 0)
         {
-            foreach (string missionNumber in buffer.missionsToUnlock)
+            foreach (string mn in buffer.missionsToUnlock)
             {
-
-                if (missionRect.Find(missionNumber).GetComponent<Mission>() == null)
+                
+                if (missionRect.Find(mn).GetComponent<Mission>() == null)
                 {
-                    missionRect.Find(missionNumber).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
-                    missionRect.Find(missionNumber).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
+                    missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
+                    ShowNextMissions(missionRect.Find(mn).GetChild(0).name);
+                    missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
+                    ShowNextMissions(missionRect.Find(mn).GetChild(1).name);
 
                 }
                 else
-                    missionRect.Find(missionNumber).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
-
-            }
-                
+                {   
+                   
+                    missionRect.Find(mn).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
+                    ShowNextMissions(mn);
+                }
+            }   
         }
-            
-
     }
+
+  
 
     public void SetPickedHero(int heroName)
     {

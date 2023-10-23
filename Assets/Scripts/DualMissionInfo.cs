@@ -7,6 +7,7 @@ public class DualMissionInfo
 {
     [Header("Map global info")]
     public string missionGlobalNumber;
+
     public Vector3 missionPosition;
     [Header("Mission 1")]
     public MissionInfo mission1;

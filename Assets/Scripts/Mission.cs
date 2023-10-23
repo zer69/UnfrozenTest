@@ -46,6 +46,11 @@ public class Mission : MonoBehaviour
         
     }
 
+    public MissionStatus GetMissionStatus()
+    {
+        return missionStatus;
+    }
+
     public void ClickAMission()
     {
         
@@ -70,12 +75,16 @@ public class Mission : MonoBehaviour
                     transform.parent.GetComponent<Image>().enabled = true;
                 }
                 transform.GetChild(0).gameObject.SetActive(true);
-
-
+                GetComponent<Button>().interactable = true;
                 break;
             case MissionStatus.Active:
                 break;
             case MissionStatus.LockedTemp:
+                if (transform.parent.tag == "DualMission")
+                {
+                    transform.parent.GetComponent<Image>().enabled = true;
+                }
+                transform.GetChild(0).gameObject.SetActive(true);
                 GetComponent<Button>().interactable = false;
                 break;
             case MissionStatus.Completed:
