@@ -9,8 +9,9 @@ public enum MissionStatus
     Locked,
     Unlocked,
     Active,
-    LockedTemp,
-    Completed
+    Shown,
+    Completed,
+    LockedTemp
 }
 
 public class Mission : MonoBehaviour
@@ -79,6 +80,7 @@ public class Mission : MonoBehaviour
                 break;
             case MissionStatus.Active:
                 break;
+            case MissionStatus.Shown:
             case MissionStatus.LockedTemp:
                 if (transform.parent.tag == "DualMission")
                 {

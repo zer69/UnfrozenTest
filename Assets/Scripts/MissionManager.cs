@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using TMPro;
 using UnityEngine.UI;
+using System;
 
 public class MissionManager : MonoBehaviour
 {
@@ -73,28 +74,20 @@ public class MissionManager : MonoBehaviour
         {
             foreach (string mn in buffer.missionsToUnlock)
             {
-
                 if (missionRect.Find(mn).GetComponent<Mission>() == null)
                 {
                     if (missionRect.Find(mn).GetChild(0).GetComponent<Mission>().GetMissionStatus() == MissionStatus.Locked)
                     {
-                        missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
-                        missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
+                        missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.Shown);
+                        missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.Shown);
                     }
-                    
-
                 }
                 else
                     if (missionRect.Find(mn).GetComponent<Mission>().GetMissionStatus() == MissionStatus.Locked)
-                        missionRect.Find(mn).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
-
+                        missionRect.Find(mn).GetComponent<Mission>().SetMissionStatus(MissionStatus.Shown);
             }
-
         }
-
     }
-
-
 
     public void UpdateMissionBriefing(string missionNumber)
     {
@@ -133,7 +126,6 @@ public class MissionManager : MonoBehaviour
             missionInfoCanvas.GetChild(0).GetChild(0).GetChild(3).GetComponent<TMP_Text>().text = buffer.enemyText;
         }
         //missionInfoCanvas.GetChild(0).GetChild(0).GetChild(2).GetComponent<Image>().sprite = set sprite here
-
         missionInfoCanvas.GetChild(0).GetChild(1).GetChild(0).GetComponent<TMP_Text>().text = buffer.missionText;
     }
 
@@ -146,7 +138,6 @@ public class MissionManager : MonoBehaviour
                 return info;
             }
         }
-
         foreach (DualMissionInfo info in missionList.dualMissionInfoList)
         {
             if (info.mission1.missionNumber == missionNumber)
@@ -171,6 +162,7 @@ public class MissionManager : MonoBehaviour
                     Transform dualMissionBuffer = mission.Find(currentMissionNumber);
                     dualMissionBuffer.GetComponent<Mission>().SetMissionStatus(MissionStatus.Completed);
                     dualMissionBuffer.parent.GetChild(dualMissionBuffer.GetSiblingIndex() == 0 ? 1 : 0).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
+                    LockNextMissions(dualMissionBuffer.parent.GetChild(dualMissionBuffer.GetSiblingIndex() == 0 ? 1 : 0).name);
                 }
             }
         }
@@ -195,30 +187,60 @@ public class MissionManager : MonoBehaviour
             }
         }
             
-        if (buffer.missionsToUnlock.Count > 0)
+        foreach (string mn in buffer.missionsToUnlock)
         {
-            foreach (string mn in buffer.missionsToUnlock)
-            {
                 
-                if (missionRect.Find(mn).GetComponent<Mission>() == null)
+            if (missionRect.Find(mn).GetComponent<Mission>() == null)
+            {
+                missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
+                ShowNextMissions(missionRect.Find(mn).GetChild(0).name);
+                missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
+                ShowNextMissions(missionRect.Find(mn).GetChild(1).name);
+            }
+            else
+            {   
+                if (CanUnlockMission(FindMissionInfo(mn)))
                 {
-                    missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
-                    ShowNextMissions(missionRect.Find(mn).GetChild(0).name);
-                    missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
-                    ShowNextMissions(missionRect.Find(mn).GetChild(1).name);
-
-                }
-                else
-                {   
-                   
                     missionRect.Find(mn).GetComponent<Mission>().SetMissionStatus(MissionStatus.Unlocked);
                     ShowNextMissions(mn);
                 }
-            }   
+                
+            }
+        }   
+    }
+
+    
+
+    private bool CanUnlockMission(MissionInfo missionInfo)
+    {
+        foreach (string prerequities in missionInfo.previousMissionList)
+        {
+            if (prerequities.Length > 2)
+            {
+                if (missionRect.Find(prerequities.Substring(0, prerequities.Length - 2)).Find(prerequities).GetComponent<Mission>().GetMissionStatus() < MissionStatus.Completed)
+                {
+                    return false;
+                }
+                
+            }
+            else
+                if (missionRect.Find(prerequities).GetComponent<Mission>().GetMissionStatus() < MissionStatus.Completed)
+                    return false;
+        }
+
+        return true;
+    }
+
+    private void LockNextMissions(string name)
+    {
+        MissionInfo buffer = FindMissionInfo(name);
+        foreach (string nextMission in buffer.missionsToUnlock)
+        {
+            missionRect.Find(nextMission).GetComponent<Mission>().SetMissionStatus(MissionStatus.LockedTemp);
         }
     }
 
-  
+
 
     public void SetPickedHero(int heroName)
     {
@@ -230,12 +252,4 @@ public class MissionManager : MonoBehaviour
         }
         
     }
-
-    public void StartMission()
-    {
-
-    }
-
-
-
 }
