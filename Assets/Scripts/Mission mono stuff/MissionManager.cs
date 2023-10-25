@@ -74,20 +74,12 @@ public class MissionManager : MonoBehaviour
         {
             foreach (string mn in buffer.missionsToUnlock)
             {
-                if (missionRect.Find(mn).GetComponent<Mission>() == null)
-                {
-                    if (missionRect.Find(mn).GetChild(0).GetComponent<Mission>().GetMissionStatus() == MissionStatus.Locked)
-                    {
-                        missionRect.Find(mn).GetChild(0).GetComponent<Mission>().SetMissionStatus(MissionStatus.Shown);
-                        missionRect.Find(mn).GetChild(1).GetComponent<Mission>().SetMissionStatus(MissionStatus.Shown);
-                    }
-                }
-                else
-                    if (missionRect.Find(mn).GetComponent<Mission>().GetMissionStatus() == MissionStatus.Locked)
-                        missionRect.Find(mn).GetComponent<Mission>().SetMissionStatus(MissionStatus.Shown);
+                SetNewMissionStatus(mn, MissionStatus.Locked, MissionStatus.Shown);
             }
         }
     }
+
+    
 
     public void UpdateMissionBriefing(string missionNumber)
     {
@@ -209,8 +201,6 @@ public class MissionManager : MonoBehaviour
         }   
     }
 
-    
-
     private bool CanUnlockMission(MissionInfo missionInfo)
     {
         foreach (string prerequities in missionInfo.previousMissionList)
@@ -240,7 +230,20 @@ public class MissionManager : MonoBehaviour
         }
     }
 
-
+    private void SetNewMissionStatus(string missionNumber, MissionStatus statusToCheck, MissionStatus statusToSet)
+    {
+        if (missionRect.Find(missionNumber).GetComponent<Mission>() == null)
+        {
+            if (missionRect.Find(missionNumber).GetChild(0).GetComponent<Mission>().GetMissionStatus() == statusToCheck)
+            {
+                missionRect.Find(missionNumber).GetChild(0).GetComponent<Mission>().SetMissionStatus(statusToSet);
+                missionRect.Find(missionNumber).GetChild(1).GetComponent<Mission>().SetMissionStatus(statusToSet);
+            }
+        }
+        else
+            if (missionRect.Find(missionNumber).GetComponent<Mission>().GetMissionStatus() == statusToCheck)
+            missionRect.Find(missionNumber).GetComponent<Mission>().SetMissionStatus(statusToSet);
+    }
 
     public void SetPickedHero(int heroName)
     {
